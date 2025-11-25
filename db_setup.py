@@ -1,5 +1,5 @@
 import os
-import psycopg2 
+import psycopg2
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -31,10 +31,11 @@ def create_tables():
     """
     connection = get_connection()
     cursor = connection.cursor()
-    
+
     try:
-        # Tabell 1 Bids (bud) 
-        cursor.execute("""
+        # Tabell 1 Bids (bud)
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS bids (
                 id BIGSERIAL PRIMARY KEY,
                 user_id BIGINT NOT NULL,
@@ -42,20 +43,24 @@ def create_tables():
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 bid_amount DECIMAL(10,2) NOT NULL
             )
-        """)
+        """
+        )
 
         # Tabell 2: User_Ratings (Användarens totala betyg)
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS user_ratings (
                 id BIGSERIAL PRIMARY KEY,
                 user_id BIGINT NOT NULL,
                 total_ratings INT NOT NULL DEFAULT 0,
                 average_rating DECIMAL(3,2) NOT NULL DEFAULT 0.00
             )
-        """)
+        """
+        )
 
         # Tabell 3: Reviews (Recensioner)
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS reviews (
                 id BIGSERIAL PRIMARY KEY,
                 reviewer_id BIGINT NOT NULL,
@@ -65,10 +70,25 @@ def create_tables():
                 review_text TEXT,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
-        # Tabell 4: Reports (Rapporterade annonser)
-        cursor.execute("""
+        # Tabell 4: Images (Bilder på annonser)
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS images (
+                id BIGSERIAL PRIMARY KEY,
+                user_id BIGINT NOT NULL,
+                listing_id BIGINT NOT NULL,
+                image_url VARCHAR(500) NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+        )
+
+        # Tabell 5: Reports (Rapporterade annonser)
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS reports (
                 id BIGSERIAL PRIMARY KEY,
                 user_id BIGINT NOT NULL,
@@ -76,8 +96,19 @@ def create_tables():
                 report_reason TEXT NOT NULL,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """
+        )
 
+        # Spara allt
+        connection.commit()
+
+    except psycopg2.Error as error:
+        connection.rollback()
+        print(f"Error creating tables: {error}")
+        raise
+    finally:
+        cursor.close()
+        connection.close()
 
 
 if __name__ == "__main__":
