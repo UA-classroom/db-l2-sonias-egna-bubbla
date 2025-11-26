@@ -2,10 +2,9 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
-
-DATABASE_NAME = os.getenv("tradera_db")
-PASSWORD = os.getenv("ditt_lösenord_här")
+# Tillfällig lösning, problem, Hårdkodat
+DATABASE_NAME = "tradera_db"
+PASSWORD = "174Elsa"
 
 
 def get_connection():
