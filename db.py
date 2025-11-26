@@ -18,6 +18,18 @@ start with a connection parameter.
 """
 
 
+# BID FUNCTIONS
+
+
+def get_all_bids(connection):
+    """Hämtar alla bud från databasen"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM bids ORDER BY created_at DESC")
+            bids = cursor.fetchall()
+    return bids
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
