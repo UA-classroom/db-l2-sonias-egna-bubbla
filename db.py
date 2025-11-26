@@ -30,6 +30,19 @@ def get_all_bids(connection):
     return bids
 
 
+def get_bid_by_id(connection, bid_id):
+    """Hämtar ett specifikt bud"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM bids WHERE id = %s", (bid_id,))
+            bid = cursor.fetchone()
+
+    if not bid:
+        raise ValueError(f"Bud med id {bid_id} finns inte")
+
+    return bid
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
