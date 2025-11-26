@@ -43,6 +43,22 @@ def get_bid_by_id(connection, bid_id):
     return bid
 
 
+def get_bids_for_listing(connection, listing_id):
+    """Hämtar alla bud för en specifik annons"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM bids 
+                WHERE listing_id = %s 
+                ORDER BY bid_amount DESC
+            """,
+                (listing_id,),
+            )
+            bids = cursor.fetchall()
+    return bids
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
