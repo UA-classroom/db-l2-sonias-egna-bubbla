@@ -59,6 +59,22 @@ def get_bids_for_listing(connection, listing_id):
     return bids
 
 
+def create_bid(connection, user_id, listing_id, bid_amount):
+    """Skapar ett nytt bud"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO bids (user_id, listing_id, bid_amount)
+                VALUES (%s, %s, %s)
+                RETURNING *
+            """,
+                (user_id, listing_id, bid_amount),
+            )
+            new_bid = cursor.fetchone()
+    return new_bid
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
