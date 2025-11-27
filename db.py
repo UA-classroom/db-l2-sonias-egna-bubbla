@@ -88,6 +88,18 @@ def delete_bid(connection, bid_id):
     return {"message": "Bud raderat", "id": deleted_bid["id"]}
 
 
+# User_Ratings functions
+
+
+def get_all_user_ratings(connection):
+    """Hämtar alla användarratings"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM user_ratings")
+            ratings = cursor.fetchall()
+    return ratings
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
