@@ -160,6 +160,21 @@ def update_user_rating(connection, user_id, total_ratings=None, average_rating=N
     return updated_rating
 
 
+def delete_user_rating(connection, user_id):
+    """Raderar ett användarrating"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                "DELETE FROM user_ratings WHERE user_id = %s RETURNING id", (user_id,)
+            )
+            deleted_rating = cursor.fetchone()
+
+    if not deleted_rating:
+        raise ValueError(f"Rating för användare {user_id} finns inte")
+
+    return {"message": "Rating raderat", "id": deleted_rating["id"]}
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
