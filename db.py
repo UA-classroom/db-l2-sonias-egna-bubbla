@@ -113,6 +113,22 @@ def get_user_rating_by_user_id(connection, user_id):
     return rating
 
 
+def create_user_rating(connection, user_id, total_ratings=0, average_rating=0.00):
+    """Skapar ett nytt användarrating"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO user_ratings (user_id, total_ratings, average_rating)
+                VALUES (%s, %s, %s)
+                RETURNING *
+            """,
+                (user_id, total_ratings, average_rating),
+            )
+            new_rating = cursor.fetchone()
+    return new_rating
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
