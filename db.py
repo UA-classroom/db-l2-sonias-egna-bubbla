@@ -175,6 +175,18 @@ def delete_user_rating(connection, user_id):
     return {"message": "Rating raderat", "id": deleted_rating["id"]}
 
 
+# Review Functions
+
+
+def get_all_reviews(conncection):
+    """Hämtar alla recenssioner"""
+    with conncection:
+        with conncection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM reviews ORDER BY created_at DESC")
+            reviews = cursor.fetchall()
+    return reviews
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
