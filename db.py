@@ -187,6 +187,68 @@ def get_all_reviews(conncection):
     return reviews
 
 
+def get_review_by_id(connection, review_id):
+    """Hämtar en specifik recension"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM reviews WHERE id = %s", (review_id,))
+            review = cursor.fetchone()
+
+    if not review:
+        raise ValueError(f"Recension med id {review_id} finns inte")
+
+    return review
+
+
+def get_reviews_for_user(connection, user_id):
+    """Hämtar alla recensioner för en användare"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM reviews 
+                WHERE reviewed_user_id = %s 
+                ORDER BY created_at DESC
+            """,
+                (user_id,),
+            )
+            reviews = cursor.fetchall()
+    return reviews
+
+
+def create_review(
+    connection, reviewer_id, reviewed_user_id, listing_id, rating, review_text=None
+):
+    """Skapar en ny recension"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO reviews (reviewer_id, reviewed_user_id, listing_id, rating, review_text)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING *
+            """,
+                (reviewer_id, reviewed_user_id, listing_id, rating, review_text),
+            )
+            new_review = cursor.fetchone()
+    return new_review
+
+
+def delete_review(connection, review_id):
+    """Raderar en recension"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                "DELETE FROM reviews WHERE id = %s RETURNING id", (review_id,)
+            )
+            deleted_review = cursor.fetchone()
+
+    if not deleted_review:
+        raise ValueError(f"Recension med id {review_id} finns inte")
+
+    return {"message": "Recension raderad", "id": deleted_review["id"]}
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
