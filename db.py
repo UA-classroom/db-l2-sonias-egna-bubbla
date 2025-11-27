@@ -18,7 +18,7 @@ start with a connection parameter.
 """
 
 
-# BID FUNCTIONS
+# Bid functions
 
 
 def get_all_bids(connection):
@@ -73,6 +73,19 @@ def create_bid(connection, user_id, listing_id, bid_amount):
             )
             new_bid = cursor.fetchone()
     return new_bid
+
+
+def delete_bid(connection, bid_id):
+    """Raderar ett bud"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("DELETE FROM bids WHERE id = %s RETURNING id", (bid_id,))
+            deleted_bid = cursor.fetchone()
+
+    if not deleted_bid:
+        raise ValueError(f"Bud med id {bid_id} finns inte")
+
+    return {"message": "Bud raderat", "id": deleted_bid["id"]}
 
 
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
