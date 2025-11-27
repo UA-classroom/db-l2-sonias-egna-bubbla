@@ -100,6 +100,19 @@ def get_all_user_ratings(connection):
     return ratings
 
 
+def get_user_rating_by_user_id(connection, user_id):
+    """Hämtar rating för en specifik användare"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM user_ratings WHERE user_id = %s", (user_id,))
+            rating = cursor.fetchone()
+
+    if not rating:
+        raise ValueError(f"Rating för användare {user_id} finns inte")
+
+    return rating
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
