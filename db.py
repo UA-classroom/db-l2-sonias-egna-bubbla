@@ -129,6 +129,37 @@ def create_user_rating(connection, user_id, total_ratings=0, average_rating=0.00
     return new_rating
 
 
+def update_user_rating(connection, user_id, total_ratings=None, average_rating=None):
+    """Uppdaterar ett användarrating"""
+    updates = []
+    values = []
+
+    if total_ratings is not None:
+        updates.append("total_ratings = %s")
+        values.append(total_ratings)
+    if average_rating is not None:
+        updates.append("average_rating = %s")
+        values.append(average_rating)
+
+    if not updates:
+        raise ValueError("Inget att uppdatera")
+
+    values.append(user_id)
+    query = (
+        f"UPDATE user_ratings SET {', '.join(updates)} WHERE user_id = %s RETURNING *"
+    )
+
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, values)
+            updated_rating = cursor.fetchone()
+
+    if not updated_rating:
+        raise ValueError(f"Rating för användare {user_id} finns inte")
+
+    return updated_rating
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
