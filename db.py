@@ -249,6 +249,76 @@ def delete_review(connection, review_id):
     return {"message": "Recension raderad", "id": deleted_review["id"]}
 
 
+# Image Function
+
+
+def get_all_images(connection):
+    """Hämtar alla bilder"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM images ORDER BY created_at DESC")
+            images = cursor.fetchall()
+    return images
+
+
+def get_image_by_id(connection, image_id):
+    """Hämtar en specifik bild"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM images WHERE id = %s", (image_id,))
+            image = cursor.fetchone()
+
+    if not image:
+        raise ValueError(f"Bild med id {image_id} finns inte")
+
+    return image
+
+
+def get_images_for_listing(connection, listing_id):
+    """Hämtar alla bilder för en annons"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM images 
+                WHERE listing_id = %s 
+                ORDER BY created_at ASC
+            """,
+                (listing_id,),
+            )
+            images = cursor.fetchall()
+    return images
+
+
+def create_image(connection, user_id, listing_id, image_url):
+    """Lägger till en ny bild"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO images (user_id, listing_id, image_url)
+                VALUES (%s, %s, %s)
+                RETURNING *
+            """,
+                (user_id, listing_id, image_url),
+            )
+            new_image = cursor.fetchone()
+    return new_image
+
+
+def delete_image(connection, image_id):
+    """Raderar en bild"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("DELETE FROM images WHERE id = %s RETURNING id", (image_id,))
+            deleted_image = cursor.fetchone()
+
+    if not deleted_image:
+        raise ValueError(f"Bild med id {image_id} finns inte")
+
+    return {"message": "Bild raderad", "id": deleted_image["id"]}
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
