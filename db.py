@@ -319,6 +319,78 @@ def delete_image(connection, image_id):
     return {"message": "Bild raderad", "id": deleted_image["id"]}
 
 
+# Report functions
+
+
+def get_all_reports(connection):
+    """Hämtar alla rapporteringar"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM reports ORDER BY created_at DESC")
+            reports = cursor.fetchall()
+    return reports
+
+
+def get_report_by_id(connection, report_id):
+    """Hämtar en specifik rapport"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM reports WHERE id = %s", (report_id,))
+            report = cursor.fetchone()
+
+    if not report:
+        raise ValueError(f"Rapport med id {report_id} finns inte")
+
+    return report
+
+
+def get_reports_for_listing(connection, listing_id):
+    """Hämtar alla rapporter för en annons"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT * FROM reports 
+                WHERE listing_id = %s 
+                ORDER BY created_at DESC
+            """,
+                (listing_id,),
+            )
+            reports = cursor.fetchall()
+    return reports
+
+
+def create_report(connection, user_id, listing_id, report_reason):
+    """Skapar en ny rapportering"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO reports (user_id, listing_id, report_reason)
+                VALUES (%s, %s, %s)
+                RETURNING *
+            """,
+                (user_id, listing_id, report_reason),
+            )
+            new_report = cursor.fetchone()
+    return new_report
+
+
+def delete_report(connection, report_id):
+    """Raderar en rapportering"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                "DELETE FROM reports WHERE id = %s RETURNING id", (report_id,)
+            )
+            deleted_report = cursor.fetchone()
+
+    if not deleted_report:
+        raise ValueError(f"Rapport med id {report_id} finns inte")
+
+    return {"message": "Rapportering raderad", "id": deleted_report["id"]}
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
