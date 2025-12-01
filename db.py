@@ -391,6 +391,121 @@ def delete_report(connection, report_id):
     return {"message": "Rapportering raderad", "id": deleted_report["id"]}
 
 
+# User function
+def get_all_users(connection):
+    """Hämtar alla användare"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("SELECT * FROM users")
+            all_users = cursor.fetchall()
+    return all_users
+
+
+def get_user_by_id(connection, user_id):
+    """Hämtar en specifik användare med ID"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT id, username, email, user_since, date_of_birth, phone_number 
+                FROM users 
+                WHERE id = %s
+            """,
+                (user_id,),
+            )
+            user = cursor.fetchone()
+
+    if not user:
+        raise ValueError(f"Användare med id {user_id} finns inte")
+
+    return user
+
+
+def get_user_by_email(connection, email):
+    """Hämtar användare med email (för inloggning)"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT id, username, email, user_since, date_of_birth, phone_number 
+                FROM users 
+                WHERE email = %s
+            """,
+                (email,),
+            )
+            user = cursor.fetchone()
+    return user
+
+
+def get_user_by_username(connection, username):
+    """Hämtar användare med username (för inloggning)"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                SELECT id, username, email, user_since, date_of_birth, phone_number 
+                FROM users 
+                WHERE username = %s
+            """,
+                (username,),
+            )
+            user = cursor.fetchone()
+    return user
+
+
+def create_user(
+    connection, username, email, password, user_since, date_of_birth, phone_number
+):
+    """Skapar en ny användare"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                INSERT INTO users (username, email, password, user_since, date_of_birth, phone_number) 
+                VALUES (%s, %s, %s, %s, %s, %s) 
+                RETURNING *
+            """,
+                (username, email, password, user_since, date_of_birth, phone_number),
+            )
+            new_user = cursor.fetchone()
+    return new_user
+
+
+def update_user(connection, user_id, email=None, phone_number=None):
+    """Uppdaterar en specifik användares email eller telefonnummer"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(
+                """
+                UPDATE users 
+                SET email = COALESCE(%s, email),
+                    phone_number = COALESCE(%s, phone_number)
+                WHERE id = %s 
+                RETURNING *
+            """,
+                (email, phone_number, user_id),
+            )
+            updated_user = cursor.fetchone()
+
+    if not updated_user:
+        raise ValueError(f"Användare med id {user_id} finns inte")
+
+    return updated_user
+
+
+def delete_user(connection, user_id):
+    """Raderar en användare"""
+    with connection:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute("DELETE FROM users WHERE id = %s RETURNING *", (user_id,))
+            deleted_user = cursor.fetchone()
+
+    if not deleted_user:
+        raise ValueError(f"Användare med id {user_id} finns inte")
+
+    return {"message": "Användare raderad", "user": deleted_user}
+
+
 ### THIS IS JUST AN EXAMPLE OF A FUNCTION FOR INSPIRATION FOR A LIST-OPERATION (FETCHING MANY ENTRIES)
 # def get_items(con):
 #     with con:
