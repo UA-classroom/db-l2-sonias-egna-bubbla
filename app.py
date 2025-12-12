@@ -1,6 +1,7 @@
 import os
 
 import psycopg2
+import db
 from db_setup import get_connection
 from fastapi import FastAPI, HTTPException
 
@@ -966,4 +967,4 @@ def update_shipping(
 @app.get("/")
 def root():
     """Välkomstmeddelande"""
-    return {"message": "Välkommen till Tradera API"}
+    return {"message": "Välkommen"}
