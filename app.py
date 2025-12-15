@@ -3,7 +3,7 @@ import os
 import psycopg2
 import db
 from db_setup import get_connection
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 
 app = FastAPI()
 
@@ -50,7 +50,9 @@ def get_bids_for_listing(listing_id: int):
 
 
 @app.post("/bids", status_code=201)
-def create_bid(user_id: int, listing_id: int, bid_amount: float):
+def create_bid(
+    user_id: int = Body(...), listing_id: int = Body(...), bid_amount: float = Body(...)
+):
     """Skapar ett nytt bud"""
     try:
         connection = get_connection()
@@ -102,7 +104,9 @@ def get_user_rating(user_id: int):
 
 @app.post("/user-ratings", status_code=201)
 def create_user_rating(
-    user_id: int, total_ratings: int = 0, average_rating: float = 0.00
+    user_id: int = Body(...),
+    total_ratings: int = Body(0),
+    average_rating: float = Body(0.00),
 ):
     """Skapar ett nytt omdöme"""
     try:
@@ -185,11 +189,11 @@ def get_reviews_for_user(user_id: int):
 
 @app.post("/reviews", status_code=201)
 def create_review(
-    reviewer_id: int,
-    reviewed_user_id: int,
-    listing_id: int,
-    rating: int,
-    review_text: str = None,
+    reviewer_id: int = Body(...),
+    reviewed_user_id: int = Body(...),
+    listing_id: int = Body(...),
+    rating: int = Body(...),
+    review_text: str = Body(None),
 ):
     """Skapar en ny recension"""
     try:
@@ -252,7 +256,9 @@ def get_images_for_listing(listing_id: int):
 
 
 @app.post("/images", status_code=201)
-def create_image(user_id: int, listing_id: int, image_url: str):
+def create_image(
+    user_id: int = Body(...), listing_id: int = Body(...), image_url: str = Body(...)
+):
     """Skapar en ny bild"""
     try:
         connection = get_connection()
@@ -312,7 +318,11 @@ def get_reports_for_listing(listing_id: int):
 
 
 @app.post("/reports", status_code=201)
-def create_report(user_id: int, listing_id: int, report_reason: str):
+def create_report(
+    user_id: int = Body(...),
+    listing_id: int = Body(...),
+    report_reason: str = Body(...),
+):
     """Skapar en ny rapportering"""
     try:
         connection = get_connection()
@@ -364,12 +374,12 @@ def get_user(user_id: int):
 
 @app.post("/users", status_code=201)
 def create_user(
-    username: str,
-    email: str,
-    password: str,
-    user_since: str,
-    date_of_birth: str,
-    phone_number: str = None,
+    username: str = Body(...),
+    email: str = Body(...),
+    password: str = Body(...),
+    user_since: str = Body(...),
+    date_of_birth: str = Body(...),
+    phone_number: str = Body(None),
 ):
     """Skapar en ny användare"""
     try:
@@ -429,7 +439,7 @@ def get_all_categories():
 
 
 @app.post("/categories", status_code=201)
-def create_category(name: str):
+def create_category(name: str = Body(..., embed=True)):
     """Skapar en ny kategori"""
     try:
         connection = get_connection()
@@ -481,15 +491,15 @@ def get_listing(listing_id: int):
 
 @app.post("/listings", status_code=201)
 def create_listing(
-    user_id: int,
-    category_id: int,
-    title: str,
-    listing_type: str,
-    price: float,
-    region: str,
-    status: str,
-    description: str,
-    image_url: str = None,
+    user_id: int = Body(...),
+    category_id: int = Body(...),
+    title: str = Body(...),
+    listing_type: str = Body(...),
+    price: float = Body(...),
+    region: str = Body(...),
+    status: str = Body(...),
+    description: str = Body(...),
+    image_url: str = Body(None),
 ):
     """Skapar en ny annons"""
     try:
@@ -573,7 +583,7 @@ def get_watchlist(user_id: int):
 
 
 @app.post("/watchlist", status_code=201)
-def add_to_watchlist(user_id: int, listing_id: int):
+def add_to_watchlist(user_id: int = Body(...), listing_id: int = Body(...)):
     """Lägger till i bevakningslista"""
     try:
         connection = get_connection()
@@ -614,7 +624,10 @@ def get_messages(user_id: int):
 
 @app.post("/messages", status_code=201)
 def create_message(
-    sender_id: int, recipient_id: int, listing_id: int, message_text: str
+    sender_id: int = Body(...),
+    recipient_id: int = Body(...),
+    listing_id: int = Body(...),
+    message_text: str = Body(...),
 ):
     """Skapar ett nytt meddelande"""
     try:
@@ -691,7 +704,11 @@ def get_user_transactions(user_id: int):
 
 @app.post("/transactions", status_code=201)
 def create_transaction(
-    user_id: int, listing_id: int, amount: float, status: str, bid_id: int = None
+    user_id: int = Body(...),
+    listing_id: int = Body(...),
+    amount: float = Body(...),
+    status: str = Body(...),
+    bid_id: int = Body(None),
 ):
     """Skapar en ny transaktion"""
     try:
@@ -748,11 +765,11 @@ def get_payment(transaction_id: int):
 
 @app.post("/payments", status_code=201)
 def create_payment(
-    transaction_id: int,
-    listing_id: int,
-    payment_method: str,
-    payment_status: str,
-    amount: float,
+    transaction_id: int = Body(...),
+    listing_id: int = Body(...),
+    payment_method: str = Body(...),
+    payment_status: str = Body(...),
+    amount: float = Body(...),
 ):
     """Skapar en ny betalning"""
     try:
@@ -808,7 +825,10 @@ def get_unread_notifications(user_id: int):
 
 @app.post("/notifications", status_code=201)
 def create_notification(
-    user_id: int, listing_id: int, notification_type: str, notification_message: str
+    user_id: int = Body(...),
+    listing_id: int = Body(...),
+    notification_type: str = Body(...),
+    notification_message: str = Body(...),
 ):
     """Skapar en ny notis"""
     try:
@@ -860,7 +880,9 @@ def get_listing_comments(listing_id: int):
 
 
 @app.post("/comments", status_code=201)
-def create_comment(user_id: int, listing_id: int, comment_text: str):
+def create_comment(
+    user_id: int = Body(...), listing_id: int = Body(...), comment_text: str = Body(...)
+):
     """Skapar en ny kommentar"""
     try:
         connection = get_connection()
@@ -914,14 +936,14 @@ def get_shipping(listing_id: int):
 
 @app.post("/shipping", status_code=201)
 def create_shipping(
-    user_id: int,
-    listing_id: int,
-    shipping_method: str,
-    shipping_cost: float,
-    estimated_delivery_days: int = None,
-    tracking_number: str = None,
-    status: str = None,
-    shipped_at: str = None,
+    user_id: int = Body(...),
+    listing_id: int = Body(...),
+    shipping_method: str = Body(...),
+    shipping_cost: float = Body(...),
+    estimated_delivery_days: int = Body(None),
+    tracking_number: str = Body(None),
+    status: str = Body(None),
+    shipped_at: str = Body(None),
 ):
     """Skapar fraktdetaljer"""
     try:
